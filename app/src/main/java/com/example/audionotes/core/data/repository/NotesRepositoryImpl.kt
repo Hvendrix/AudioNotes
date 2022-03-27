@@ -5,7 +5,7 @@ import com.example.audionotes.core.domain.repository.NotesRepository
 import kotlinx.coroutines.flow.Flow
 
 class NotesRepositoryImpl(
-private val localDataSource: NoteLocalDataSource
+    private val localDataSource: NoteLocalDataSource
 ) : NotesRepository {
     override suspend fun getNotes(): Flow<MutableList<AudioNote>> {
         return localDataSource.getNotes()
@@ -25,5 +25,9 @@ private val localDataSource: NoteLocalDataSource
 
     override suspend fun updateDuration(id: Long, endDateTime: Long) {
         return localDataSource.updateDuration(id, endDateTime)
+    }
+
+    override suspend fun updateName(id: Long, name: String) {
+        return localDataSource.updateName(id, name)
     }
 }

@@ -13,4 +13,6 @@ interface NotesRepository {
     suspend fun deleteNotes()
 
     suspend fun updateDuration(id: Long, endDateTime: Long)
+
+    suspend fun updateName(id: Long, name: String)
 }

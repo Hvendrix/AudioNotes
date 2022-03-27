@@ -1,13 +1,12 @@
 package com.example.audionotes.core.modules
 
-import com.example.audionotes.MainInteractor
+import com.example.audionotes.core.domain.interactors.MainInteractor
 import com.example.audionotes.core.domain.repository.NotesRepository
 import com.example.audionotes.home.domain.interactors.HomeInteractor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Inject
 import javax.inject.Singleton
 
 

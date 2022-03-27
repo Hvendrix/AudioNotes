@@ -13,5 +13,5 @@ data class AudioNote(
     @ColumnInfo(name = "note_path")
     val notePath: String,
     @PrimaryKey(autoGenerate = true)
-    val id:Int= 0,
-    )
+    val id: Long = 0,
+)

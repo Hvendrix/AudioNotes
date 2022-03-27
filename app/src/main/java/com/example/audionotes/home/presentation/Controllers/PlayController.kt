@@ -2,7 +2,6 @@ package com.example.audionotes.home.presentation.Controllers
 
 import android.media.AudioAttributes
 import android.media.MediaPlayer
-import android.media.MediaPlayer.OnCompletionListener
 import android.os.CountDownTimer
 import com.example.audionotes.core.data.model.AudioNote
 import com.example.audionotes.core.utils.DateTimeUtils
@@ -54,6 +53,7 @@ class PlayController() {
     fun stopPlayNote() {
         mediaPlayer?.stop()
         timer?.cancel()
+        timer = null
     }
 
 

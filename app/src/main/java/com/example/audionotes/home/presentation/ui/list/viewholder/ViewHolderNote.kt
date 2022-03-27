@@ -1,6 +1,5 @@
 package com.example.audionotes.home.presentation.ui.list.viewholder
 
-import android.opengl.Visibility
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.example.audionotes.R
@@ -49,10 +48,16 @@ class ViewHolderNote(
             onItemClickListener.onItemClick(audioNote)
         }
 
+        binding.textViewNameNote.setOnClickListener {
+            onItemClickListener.onItemNameClick(audioNote)
+        }
+
 
     }
 }
 
 interface OnItemClickListener {
     fun onItemClick(item: AudioNote)
+
+    fun onItemNameClick(item: AudioNote)
 }

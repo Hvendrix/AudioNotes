@@ -30,4 +30,8 @@ class HomeInteractor(
         notesRepository.updateDuration(id, endDateTime)
     }
 
+    suspend fun updateName(id: Long, name: String) = withContext(Dispatchers.IO){
+        notesRepository.updateName(id, name)
+    }
+
 }

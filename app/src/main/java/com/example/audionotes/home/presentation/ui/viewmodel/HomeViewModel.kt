@@ -6,10 +6,8 @@ import com.example.audionotes.core.data.model.AudioNote
 import com.example.audionotes.home.domain.interactors.HomeInteractor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -38,8 +36,6 @@ class HomeViewModel @Inject constructor() : ViewModel() {
 
     suspend fun saveAudioNote(audioNote: AudioNote) : Long{
              return homeInteractor.saveNote(audioNote)
-//            Timber.v("t5 x is " + x)
-//            getAudioNotes()
     }
 
     suspend fun getAudioNotes() {
@@ -47,7 +43,6 @@ class HomeViewModel @Inject constructor() : ViewModel() {
             homeInteractor.getNotes().flowOn(Dispatchers.IO).collect {
                 if(!it.isNullOrEmpty()) {
                     _notesList.value = it
-                    Timber.v("t5 list" + it.size + " " + it.get(0).startDateTime)
                 }
             }
         }
@@ -57,6 +52,13 @@ class HomeViewModel @Inject constructor() : ViewModel() {
     fun updateDuration(id: Long, endDateTime: Long){
         viewModelScope.launch {
             homeInteractor.updateDuration(id, endDateTime)
+            getAudioNotes()
+        }
+    }
+
+    fun updateName(id: Long, name: String){
+        viewModelScope.launch {
+            homeInteractor.updateName(id, name)
             getAudioNotes()
         }
     }

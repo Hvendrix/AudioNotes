@@ -1,13 +1,14 @@
 package com.example.audionotes.home.presentation.ui.fragment
 
-import android.media.MediaPlayer.OnCompletionListener
+import android.content.DialogInterface
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.OvershootInterpolator
-import androidx.core.app.ActivityCompat
+import android.widget.EditText
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -51,13 +52,6 @@ class HomeFragment : Fragment(), OnItemClickListener {
         recordController = RecordController()
         playController = PlayController()
 
-        this.activity?.let {
-            ActivityCompat.requestPermissions(
-                it,
-                arrayOf(android.Manifest.permission.RECORD_AUDIO),
-                777,
-            )
-        }
 
         binding.recyclerViewNotes.adapter = adapter
 
@@ -71,7 +65,11 @@ class HomeFragment : Fragment(), OnItemClickListener {
 
 
 
-        lifecycleScope.launch {
+//        lifecycleScope.launch {
+//            async { homeViewModel.getAudioNotes() }
+//        }
+
+        lifecycleScope.launchWhenResumed {
             async { homeViewModel.getAudioNotes() }
         }
 
@@ -103,6 +101,14 @@ class HomeFragment : Fragment(), OnItemClickListener {
             playController.stopPlayNote()
             adapter.updatePlaying(previous, false)
         }
+
+    }
+
+    override fun onDestroy() {
+        _binding = null
+        super.onDestroy()
+
+        countDownTimer = null
     }
 
     private fun onButtonClicked() {
@@ -194,6 +200,31 @@ class HomeFragment : Fragment(), OnItemClickListener {
             playController.playNote(item, adapter)
             previous = item
         }
+    }
+
+    override fun onItemNameClick(item: AudioNote) {
+        if (recordController.isAudioRecording()) {
+            stopRecord()
+            binding.startButton.setImageResource(R.drawable.ic_mic)
+        }
+
+        if(playController.stillPlaying()) {
+            playController.stopPlayNote()
+            adapter.updatePlaying(previous, false)
+        }
+        val taskEditText = EditText(this.requireContext())
+        taskEditText.setText(item.name)
+        val dialog: AlertDialog = AlertDialog.Builder(this.requireContext())
+            .setTitle("Название заметки")
+            .setMessage("Сменить название заметки?")
+            .setView(taskEditText)
+            .setPositiveButton("Сменить", DialogInterface.OnClickListener { dialog, which ->
+                val taskText = taskEditText.text.toString()
+                homeViewModel.updateName(item.id, taskText)
+            })
+            .setNegativeButton("Отмена", null)
+            .create()
+        dialog.show()
     }
 
 

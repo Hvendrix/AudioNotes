@@ -21,4 +21,7 @@ interface NotesDao {
 
     @Query("UPDATE notes SET endDateTime = :endDateTime WHERE id = :id")
     fun updateDuration(id: Long, endDateTime: Long)
+
+    @Query("UPDATE notes SET name = :name WHERE id = :id")
+    fun updateName(id: Long, name: String)
 }

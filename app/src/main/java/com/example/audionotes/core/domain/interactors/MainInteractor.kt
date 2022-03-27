@@ -1,4 +1,4 @@
-package com.example.audionotes
+package com.example.audionotes.core.domain.interactors
 
 import com.example.audionotes.core.domain.repository.NotesRepository
 import kotlinx.coroutines.Dispatchers
