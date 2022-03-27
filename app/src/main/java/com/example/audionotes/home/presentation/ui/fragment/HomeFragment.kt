@@ -1,11 +1,7 @@
 package com.example.audionotes.home.presentation.ui.fragment
 
-import android.annotation.SuppressLint
-import android.content.ContentUris
 import android.media.AudioAttributes
 import android.media.MediaPlayer
-import android.media.MediaRecorder
-import android.net.Uri
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Environment
@@ -14,22 +10,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.OvershootInterpolator
-import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import com.example.audionotes.R
-import com.example.audionotes.core.data.model.NoteEntity
+import com.example.audionotes.core.data.model.AudioNote
 import com.example.audionotes.databinding.FragmentHomeBinding
+import com.example.audionotes.home.presentation.ui.Controller.PlayController
 import com.example.audionotes.home.presentation.ui.Controller.RecordController
 import com.example.audionotes.home.presentation.ui.list.adapter.AdapterNotes
 import com.example.audionotes.home.presentation.ui.list.viewholder.OnItemClickListener
 import com.example.audionotes.home.presentation.ui.viewmodel.HomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import kotlin.math.min
 import java.io.*
@@ -41,6 +35,7 @@ class HomeFragment : Fragment(), OnItemClickListener {
     private val binding get() = _binding!!
 
     lateinit var recordController: RecordController
+    lateinit var playController: PlayController
     private var countDownTimer: CountDownTimer? = null
 
     private val homeViewModel: HomeViewModel by viewModels()
@@ -65,7 +60,8 @@ class HomeFragment : Fragment(), OnItemClickListener {
     ): View? {
         _binding = FragmentHomeBinding.inflate(inflater)
         val adapter = AdapterNotes(this)
-        recordController = RecordController(this.requireContext())
+        recordController = RecordController()
+        playController = PlayController()
 
         this.activity?.let {
             ActivityCompat.requestPermissions(
@@ -95,6 +91,11 @@ class HomeFragment : Fragment(), OnItemClickListener {
 //                Toast.makeText(this@HomeFragment.requireContext(),"data save",Toast.LENGTH_SHORT).show()
 //                Timber.v("test")
 
+//                lifecycleScope.launch {
+//                    val notes = async { homeViewModel.getAudioNotes() }
+////                    Timber.v("t5 " + notes.await().size)
+////                    homeViewModel.consumeData(notes.await())
+//                }
 
 
 
@@ -104,43 +105,27 @@ class HomeFragment : Fragment(), OnItemClickListener {
 
 
         binding.btn.setOnClickListener {
-            val filename = "name123"
-//            myExternalFile = File(this@HomeFragment.requireContext().getExternalFilesDir(filepath),filename)
-//            if(filename.toString()!=null && filename.toString().trim()!=""){
-//                var fileInputStream =FileInputStream(myExternalFile)
-//                var inputStreamReader: InputStreamReader = InputStreamReader(fileInputStream)
-//                val bufferedReader: BufferedReader = BufferedReader(inputStreamReader)
-//                val stringBuilder: StringBuilder = StringBuilder()
-//                var text: String? = null
-//                while ({ text = bufferedReader.readLine(); text }() != null) {
-//                    stringBuilder.append(text)
-//                }
-//                fileInputStream.close()
-//                //Displaying data on EditText
-//                Toast.makeText(this@HomeFragment.requireContext(),stringBuilder.toString(),Toast.LENGTH_SHORT).show()
-//            }
-//            var mediaPlayer = MediaPlayer.create(context, R.raw.sound_file_1)
-//            mediaPlayer.start()
-            val mediaPlayer = MediaPlayer().apply {
-                setAudioAttributes(
-                    AudioAttributes.Builder()
-                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                        .setUsage(AudioAttributes.USAGE_MEDIA)
-                        .build()
-                )
-//                val id: Long = 1
-//                val contentUri: Uri =
-//                    ContentUris.withAppendedId(this@HomeFragment.requireContext().getExternalFilesDir(filepath), id )
 
-//            val myUri: Uri = Uri("${context.cacheDir.absolutePath}${File.pathSeparator}.wav")
 
-//                setDataSource(this@HomeFragment.requireContext(), contentUri)
-                myExternalFile = File(this@HomeFragment.requireContext().getExternalFilesDir(filepath),filename)
-                setDataSource(myExternalFile!!.absolutePath)
-                prepare()
-                start()
+            lifecycleScope.launch{
+
+                val notes = async { homeViewModel.getAudioNotes() }
+//                 val post = async { homeViewModel.saveAudioNote(AudioNote("5", 44, 4, "4")) }
             }
-            mediaPlayer.start()
+//            val filename = "name123"
+//            val mediaPlayer = MediaPlayer().apply {
+//                setAudioAttributes(
+//                    AudioAttributes.Builder()
+//                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+//                        .setUsage(AudioAttributes.USAGE_MEDIA)
+//                        .build()
+//                )
+//                myExternalFile = File(this@HomeFragment.requireContext().getExternalFilesDir(filepath),filename)
+//                setDataSource(myExternalFile!!.absolutePath)
+//                prepare()
+//                start()
+//            }
+//            mediaPlayer.start()
         }
 
 
@@ -172,7 +157,14 @@ class HomeFragment : Fragment(), OnItemClickListener {
             countDownTimer?.cancel()
             countDownTimer = null
         } else {
-            recordController.start()
+
+            val startTime = System.currentTimeMillis()
+            val fileName = "${startTime}.wav"
+//            val fileName = "${File.pathSeparator}${startTime}.wav"
+            recordController.start(fileName)
+            lifecycleScope.launch {
+                async { homeViewModel.saveAudioNote(AudioNote("Новая заметка", startTime, 0, fileName)) }
+            }
             countDownTimer = object : CountDownTimer(60_000, VOLUME_UPDATE_DURATION) {
                 override fun onTick(p0: Long) {
                     val volume = recordController.getVolume()
@@ -207,7 +199,9 @@ class HomeFragment : Fragment(), OnItemClickListener {
     }
 
 
-    override fun onItemClick(item: String) {
-        TODO("Not yet implemented")
+    override fun onItemClick(item: AudioNote) {
+        playController.playNote(item.notePath)
     }
+
+
 }

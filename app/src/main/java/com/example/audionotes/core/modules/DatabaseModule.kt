@@ -3,6 +3,11 @@ package com.example.audionotes.core.modules
 import android.content.Context
 import androidx.room.Room
 import com.example.audionotes.core.data.database.AppDatabase
+import com.example.audionotes.core.data.database.NotesDao
+import com.example.audionotes.core.data.repository.NoteLocalDataSource
+import com.example.audionotes.core.data.repository.NoteLocalDataSourceImpl
+import com.example.audionotes.core.data.repository.NotesRepositoryImpl
+import com.example.audionotes.core.domain.repository.NotesRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,5 +36,18 @@ object DatabaseModule {
     fun provideDao(database: AppDatabase) = database.notesDao()
 
     private const val DATABASE_NAME = "audio_notes_app"
+
+
+    @Singleton
+    @Provides
+    fun provideNoteLocalDataSource(
+        notesDao: NotesDao
+    ): NoteLocalDataSource = NoteLocalDataSourceImpl(notesDao)
+
+    @Singleton
+    @Provides
+    fun provideNotesRepository(
+        noteLocalDataSource: NoteLocalDataSource
+    ) : NotesRepository = NotesRepositoryImpl(noteLocalDataSource)
 }
 

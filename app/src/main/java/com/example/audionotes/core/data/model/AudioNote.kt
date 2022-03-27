@@ -6,12 +6,12 @@ import androidx.room.PrimaryKey
 
 
 @Entity(tableName = "notes")
-data class NoteEntity(
-    @PrimaryKey(autoGenerate = true)
-    val id:Int,
+data class AudioNote(
     val name: String,
-    val date: Int,
+    val date: Long,
     val duration: Int,
     @ColumnInfo(name = "note_path")
-    val notePath: String
+    val notePath: String,
+    @PrimaryKey(autoGenerate = true)
+    val id:Int= 0,
     )

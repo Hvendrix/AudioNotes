@@ -3,7 +3,7 @@ package com.example.audionotes.home.presentation.ui.list.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.audionotes.core.data.model.NoteEntity
+import com.example.audionotes.core.data.model.AudioNote
 import com.example.audionotes.databinding.ItemNoteBinding
 import com.example.audionotes.home.presentation.ui.list.viewholder.OnItemClickListener
 import com.example.audionotes.home.presentation.ui.list.viewholder.ViewHolderNote
@@ -12,12 +12,12 @@ class AdapterNotes(
     onItemClickListener: OnItemClickListener
 ) : RecyclerView.Adapter<ViewHolderNote>() {
 
-    var data = listOf<NoteEntity>()
+    var data = listOf<AudioNote>()
 
     private var onItemClickListener: OnItemClickListener = onItemClickListener
 
 
-    fun updateData(list: List<NoteEntity>) {
+    fun updateData(list: List<AudioNote>) {
         data = list
         notifyDataSetChanged()
     }

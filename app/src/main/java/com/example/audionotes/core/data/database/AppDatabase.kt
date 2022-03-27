@@ -2,11 +2,10 @@ package com.example.audionotes.core.data.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
-import com.example.audionotes.core.data.model.NoteEntity
+import com.example.audionotes.core.data.model.AudioNote
 
 @Database(
-    entities = [NoteEntity::class],
+    entities = [AudioNote::class],
     version = 1,
     exportSchema = false
 )

@@ -1,37 +1,42 @@
 package com.example.audionotes.home.presentation.ui.Controller
 
-import android.content.Context
 import android.media.MediaRecorder
-import android.util.Log
+import com.example.audionotes.core.utils.IOUtils
 import timber.log.Timber
 import java.io.File
-import java.lang.Exception
 
 
 // взято отсюда https://github.com/otopba/record_view
-class RecordController(private val context: Context) {
+// Только сменил директорию и немного топорно, но закешировал путь в отдельном классе, чтобы не было утечек памяти
+class RecordController() {
 
     private var audioRecorder: MediaRecorder? = null
 
 
 
-    fun start() {
+    fun start(fileName: String):String {
         Timber.v("Start")
+        var path = ""
         audioRecorder = MediaRecorder().apply {
+            path = getAudioPath(fileName)
+            Timber.v("t5 path " + path)
             setAudioSource(MediaRecorder.AudioSource.MIC)
             setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS)
             setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-            setOutputFile(getAudioPath())
+            setOutputFile(path)
             prepare()
             start()
+            Timber.v("t5 start" + path)
         }
+        return path
     }
 
-    private fun getAudioPath(): String {
-        val filepath = "MyFileStorage"
+    private fun getAudioPath(fileName: String): String {
+//        val filepath = "MyFileStorage"
 //        return "${context.cacheDir.absolutePath}${File.pathSeparator}${System.currentTimeMillis()}.wav"
-        var filename = "name123"
-        val myExternalFile = File(context.getExternalFilesDir(filepath),filename)
+//        val filename ="${File.pathSeparator}${fileName}"
+//        val myExternalFile = File(context.getExternalFilesDir(filepath),filename)
+        val myExternalFile = File(IOUtils.cacheFolder, fileName)
         return "$myExternalFile"
 //        return "${context.cacheDir.absolutePath}${File.pathSeparator}.wav"
     }
