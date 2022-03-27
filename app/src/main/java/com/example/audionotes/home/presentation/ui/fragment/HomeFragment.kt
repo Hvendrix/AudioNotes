@@ -1,17 +1,18 @@
 package com.example.audionotes.home.presentation.ui.fragment
 
+import android.media.MediaPlayer.OnCompletionListener
 import android.os.Bundle
 import android.os.CountDownTimer
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.OvershootInterpolator
 import androidx.core.app.ActivityCompat
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import com.example.audionotes.R
 import com.example.audionotes.core.data.model.AudioNote
-import com.example.audionotes.core.utils.DateTimeUtils
 import com.example.audionotes.databinding.FragmentHomeBinding
 import com.example.audionotes.home.presentation.Controllers.PlayController
 import com.example.audionotes.home.presentation.Controllers.RecordController
@@ -34,19 +35,21 @@ class HomeFragment : Fragment(), OnItemClickListener {
     lateinit var recordController: RecordController
     lateinit var playController: PlayController
     private var countDownTimer: CountDownTimer? = null
-    private var startTime: Long = 0
+//    private var startTime: Long = 0
     private var currentId: Long = 0
 
     private val homeViewModel: HomeViewModel by viewModels()
 
+    private val adapter = AdapterNotes(this)
 
+    var previous: AudioNote? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentHomeBinding.inflate(inflater)
-        val adapter = AdapterNotes(this)
+//        val adapter = AdapterNotes(this)
         recordController = RecordController()
         playController = PlayController()
 
@@ -81,9 +84,40 @@ class HomeFragment : Fragment(), OnItemClickListener {
 
         lifecycleScope.launchWhenResumed {
             homeViewModel.notesList.collect {
-                adapter.updateData(it)
+                var playedList = mutableListOf<Boolean>()
+                for(i in 0..it.size){
+                    playedList.add(false)
+                }
+                adapter.updateData(it, playedList)
             }
         }
+//        playController.mediaPlayer?.setOnCompletionListener(MediaPlayer.OnCompletionListener {
+//            Timber.v("completed")
+//            if(previous!=null) {
+//                playController.stopPlayNote()
+//                adapter.updatePlaying(previous!!, false)
+//                previous = null
+//            }
+//        })
+
+//        playController.mediaPlayer?.setOnCompletionListener {
+//            Timber.v("completed")
+//            if(previous!=null) {
+//                playController.stopPlayNote()
+//                adapter.updatePlaying(previous!!, false)
+//                previous = null
+//            }
+//        }
+
+
+//        playController.mediaPlayer?.setOnCompletionListener(OnCompletionListener {
+//            Timber.v("t5 completed")
+//            if(previous!=null) {
+//                playController.stopPlayNote()
+//                adapter.updatePlaying(previous!!, false)
+//                previous = null
+//            }
+//        })
 
 
         // Inflate the layout for this fragment
@@ -98,27 +132,29 @@ class HomeFragment : Fragment(), OnItemClickListener {
 //            }
 //    }
 
+    override fun onStop() {
+        super.onStop()
+        if (recordController.isAudioRecording()) {
+            stopRecord()
+            binding.startButton.setImageResource(R.drawable.ic_mic)
+        }
+
+        if(playController.stillPlaying()) playController.stopPlayNote()
+    }
 
     private fun onButtonClicked() {
+
         Timber.v("clicked")
         if (recordController.isAudioRecording()) {
-            recordController.stop()
-            countDownTimer?.cancel()
-            countDownTimer = null
-            lifecycleScope.launch{
-                async {
-                    Timber.v("t5 current id is $currentId")
-                    homeViewModel.updateDuration(currentId, (System.currentTimeMillis() - startTime))
-                    Timber.v("t5 ${DateTimeUtils.getDuration(System.currentTimeMillis() - startTime)}")
+            stopRecord()
+            binding.startButton.setImageResource(R.drawable.ic_mic)
 
-//                    Timber.v("t5 ${homeViewModel.getNote(currentId).endDateTime}" )
-                }
-            }
-            Timber.v("t5 ${DateTimeUtils.getDuration(System.currentTimeMillis() - startTime)}")
         } else {
-            startTime = System.currentTimeMillis()
+            binding.startButton.setImageResource(R.drawable.oval)
+            playController.stopPlayNote()
+            previous=null
+            var startTime = System.currentTimeMillis()
             val fileName = "${startTime}.wav"
-//            val fileName = "${File.pathSeparator}${startTime}.wav"
             recordController.start(fileName)
             lifecycleScope.launch {
                 var id = async {
@@ -149,6 +185,20 @@ class HomeFragment : Fragment(), OnItemClickListener {
         }
     }
 
+    private fun stopRecord() {
+        recordController.stop()
+        countDownTimer?.cancel()
+        countDownTimer = null
+        lifecycleScope.launch {
+            async {
+                Timber.v("t5 current id is $currentId")
+                homeViewModel.updateDuration(currentId, (System.currentTimeMillis()))
+
+    //                    Timber.v("t5 ${homeViewModel.getNote(currentId).endDateTime}" )
+            }
+        }
+    }
+
     private fun handleVolume(volume: Int) {
         val scale = min(8.0, volume / MAX_RECORD_AMPLITUDE + 1.0).toFloat()
         Timber.v("Scale = $scale")
@@ -169,7 +219,41 @@ class HomeFragment : Fragment(), OnItemClickListener {
 
 
     override fun onItemClick(item: AudioNote) {
-        playController.playNote(item.notePath)
+        if (recordController.isAudioRecording()) {
+            stopRecord()
+        }
+
+        if(playController.stillPlaying()){
+            if(previous!=null && previous!=item){
+                playController.stopPlayNote()
+                adapter.updatePlaying(previous!!, false)
+                playController.playNote(item, adapter)
+                adapter.updatePlaying(item, true)
+                previous = item
+            } else {
+                playController.stopPlayNote()
+                adapter.updatePlaying(item, false)
+                previous=null
+            }
+        }else{
+            adapter.updatePlaying(item, true)
+            playController.playNote(item, adapter)
+            previous = item
+        }
+
+        //
+//        if(playController.stopPlayNote()){
+//            adapter.updatePlaying(item, false)
+//            previous = null
+//        } else {
+//            if(previous!=null){
+//                adapter.updatePlaying(previous!!, false)
+//            }
+//            adapter.updatePlaying(item, true)
+//            playController.playNote(item.notePath)
+//            previous = item
+//        }
+
     }
 
 

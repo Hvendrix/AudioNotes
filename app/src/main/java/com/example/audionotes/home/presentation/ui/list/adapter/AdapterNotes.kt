@@ -13,15 +13,24 @@ class AdapterNotes(
 ) : RecyclerView.Adapter<ViewHolderNote>() {
 
     var data = listOf<AudioNote>()
+    var dataPlayed = mutableListOf<Boolean>()
 
     private var onItemClickListener: OnItemClickListener = onItemClickListener
 
 
-    fun updateData(list: List<AudioNote>) {
+    fun updateData(list: List<AudioNote>, listPlayed: MutableList<Boolean>) {
         if(!list.isNullOrEmpty()) {
             data = list
+            dataPlayed = listPlayed
             notifyDataSetChanged()
+
         }
+    }
+
+    fun updatePlaying(audioNote: AudioNote, playing: Boolean){
+        var index = data.indexOf(audioNote)
+        dataPlayed[index] = playing
+        notifyItemChanged(index)
     }
     fun addToData(audioNote : AudioNote){
 
@@ -37,7 +46,7 @@ class AdapterNotes(
     }
 
     override fun onBindViewHolder(holder: ViewHolderNote, position: Int) {
-        holder.bind(data[position], onItemClickListener)
+        holder.bind(data[position],dataPlayed[position], onItemClickListener)
     }
 
     override fun getItemCount(): Int {

@@ -40,11 +40,12 @@
         android:text="10:12 / 14:15"
         tools:text="10:12 / 14:15" />
 
-    <Button
+    <ImageButton
         android:id="@+id/buttonPlayNote"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
+        android:src="@drawable/ic_play"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"

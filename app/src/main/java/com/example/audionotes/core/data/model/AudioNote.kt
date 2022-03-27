@@ -9,7 +9,7 @@ import androidx.room.PrimaryKey
 data class AudioNote(
     val name: String,
     val startDateTime: Long,
-    val endDateTime: Int,
+    val endDateTime: Long,
     @ColumnInfo(name = "note_path")
     val notePath: String,
     @PrimaryKey(autoGenerate = true)

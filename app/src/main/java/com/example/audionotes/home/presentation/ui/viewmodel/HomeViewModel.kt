@@ -24,19 +24,22 @@ class HomeViewModel @Inject constructor() : ViewModel() {
     )
     val notesList: StateFlow<List<AudioNote>> = _notesList.asStateFlow()
 
+
+    private val _playedList = MutableStateFlow<List<Boolean>>(
+        mutableListOf()
+    )
+    val playedList: StateFlow<List<Boolean>> = _playedList.asStateFlow()
+
+
     init {
 
     }
 
 
     suspend fun saveAudioNote(audioNote: AudioNote) : Long{
-        var id = 0L
-        viewModelScope.launch {
-             id = homeInteractor.saveNote(audioNote)
+             return homeInteractor.saveNote(audioNote)
 //            Timber.v("t5 x is " + x)
-            getAudioNotes()
-        }
-        return id
+//            getAudioNotes()
     }
 
     suspend fun getAudioNotes() {
