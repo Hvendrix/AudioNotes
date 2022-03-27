@@ -28,8 +28,12 @@ class RecordController(private val context: Context) {
     }
 
     private fun getAudioPath(): String {
+        val filepath = "MyFileStorage"
 //        return "${context.cacheDir.absolutePath}${File.pathSeparator}${System.currentTimeMillis()}.wav"
-        return "${context.cacheDir.absolutePath}${File.pathSeparator}.wav"
+        var filename = "name123"
+        val myExternalFile = File(context.getExternalFilesDir(filepath),filename)
+        return "$myExternalFile"
+//        return "${context.cacheDir.absolutePath}${File.pathSeparator}.wav"
     }
 
     fun stop() {

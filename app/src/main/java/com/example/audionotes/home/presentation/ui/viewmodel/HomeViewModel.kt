@@ -12,15 +12,15 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor() : ViewModel(){
 
     private val _notesList = MutableStateFlow<List<NoteEntity>>(
-        mutableListOf(NoteEntity(1,"2", 3, 4))
+        mutableListOf(NoteEntity(1,"2", 3, 4, ""))
     )
     val notesList: StateFlow<List<NoteEntity>> = _notesList.asStateFlow()
 
     init {
         _notesList.value =mutableListOf(
-            NoteEntity(1,"1", 3, 4),
-            NoteEntity(2,"2", 3, 4),
-            NoteEntity(3,"3", 3, 4)
+            NoteEntity(1,"1", 3, 4, ""),
+            NoteEntity(2,"2", 3, 4, ""),
+            NoteEntity(3,"3", 3, 4, "")
         )
     }
 

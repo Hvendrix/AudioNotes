@@ -8,11 +8,13 @@ import android.media.MediaRecorder
 import android.net.Uri
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.Environment
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.OvershootInterpolator
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -29,8 +31,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.collect
 import timber.log.Timber
-import java.io.File
 import kotlin.math.min
+import java.io.*
 
 
 @AndroidEntryPoint
@@ -42,6 +44,19 @@ class HomeFragment : Fragment(), OnItemClickListener {
     private var countDownTimer: CountDownTimer? = null
 
     private val homeViewModel: HomeViewModel by viewModels()
+
+
+
+    private val filepath = "MyFileStorage"
+    private var myExternalFile: File?=null
+    private val isExternalStorageReadOnly: Boolean get() {
+        val extStorageState = Environment.getExternalStorageState()
+        return Environment.MEDIA_MOUNTED_READ_ONLY == extStorageState
+    }
+    private val isExternalStorageAvailable: Boolean get() {
+        val extStorageState = Environment.getExternalStorageState()
+        return Environment.MEDIA_MOUNTED.equals(extStorageState)
+    }
 
 
     override fun onCreateView(
@@ -63,16 +78,47 @@ class HomeFragment : Fragment(), OnItemClickListener {
 
         binding.recyclerViewNotes.adapter = adapter
 
+        var fileData = "date"
+
         binding.startButton.apply {
             setOnClickListener {
                 Timber.v("clicked")
                 onButtonClicked()
-            }
+//                myExternalFile = File(this@HomeFragment.requireContext().getExternalFilesDir(filepath), "name123")
+//                try {
+//                    val fileOutPutStream = FileOutputStream(myExternalFile)
+//                    fileOutPutStream.write(fileData.toString().toByteArray())
+//                    fileOutPutStream.close()
+//                } catch (e: IOException) {
+//                    e.printStackTrace()
+//                }
+//                Toast.makeText(this@HomeFragment.requireContext(),"data save",Toast.LENGTH_SHORT).show()
+//                Timber.v("test")
+
+
+
 
         }
 
+        }
+
+
         binding.btn.setOnClickListener {
-            Timber.v("test")
+            val filename = "name123"
+//            myExternalFile = File(this@HomeFragment.requireContext().getExternalFilesDir(filepath),filename)
+//            if(filename.toString()!=null && filename.toString().trim()!=""){
+//                var fileInputStream =FileInputStream(myExternalFile)
+//                var inputStreamReader: InputStreamReader = InputStreamReader(fileInputStream)
+//                val bufferedReader: BufferedReader = BufferedReader(inputStreamReader)
+//                val stringBuilder: StringBuilder = StringBuilder()
+//                var text: String? = null
+//                while ({ text = bufferedReader.readLine(); text }() != null) {
+//                    stringBuilder.append(text)
+//                }
+//                fileInputStream.close()
+//                //Displaying data on EditText
+//                Toast.makeText(this@HomeFragment.requireContext(),stringBuilder.toString(),Toast.LENGTH_SHORT).show()
+//            }
 //            var mediaPlayer = MediaPlayer.create(context, R.raw.sound_file_1)
 //            mediaPlayer.start()
             val mediaPlayer = MediaPlayer().apply {
@@ -82,11 +128,15 @@ class HomeFragment : Fragment(), OnItemClickListener {
                         .setUsage(AudioAttributes.USAGE_MEDIA)
                         .build()
                 )
-                val id: Long = 1
-                val contentUri: Uri =
-                    ContentUris.withAppendedId(android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id )
+//                val id: Long = 1
+//                val contentUri: Uri =
+//                    ContentUris.withAppendedId(this@HomeFragment.requireContext().getExternalFilesDir(filepath), id )
+
 //            val myUri: Uri = Uri("${context.cacheDir.absolutePath}${File.pathSeparator}.wav")
-                setDataSource(this@HomeFragment.requireContext(), contentUri)
+
+//                setDataSource(this@HomeFragment.requireContext(), contentUri)
+                myExternalFile = File(this@HomeFragment.requireContext().getExternalFilesDir(filepath),filename)
+                setDataSource(myExternalFile!!.absolutePath)
                 prepare()
                 start()
             }
