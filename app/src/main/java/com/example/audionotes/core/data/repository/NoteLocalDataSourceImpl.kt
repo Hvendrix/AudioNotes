@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 class NoteLocalDataSourceImpl(
     val notesDao: NotesDao
 ): NoteLocalDataSource {
-    override suspend fun getNotes(): Flow<List<AudioNote>> {
+    override suspend fun getNotes(): Flow<MutableList<AudioNote>> {
         return notesDao.getNotes()
     }
 

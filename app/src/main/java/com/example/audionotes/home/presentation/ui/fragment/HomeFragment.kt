@@ -35,7 +35,6 @@ class HomeFragment : Fragment(), OnItemClickListener {
     lateinit var recordController: RecordController
     lateinit var playController: PlayController
     private var countDownTimer: CountDownTimer? = null
-//    private var startTime: Long = 0
     private var currentId: Long = 0
 
     private val homeViewModel: HomeViewModel by viewModels()
@@ -49,7 +48,6 @@ class HomeFragment : Fragment(), OnItemClickListener {
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentHomeBinding.inflate(inflater)
-//        val adapter = AdapterNotes(this)
         recordController = RecordController()
         playController = PlayController()
 
@@ -66,16 +64,11 @@ class HomeFragment : Fragment(), OnItemClickListener {
 
         binding.startButton.apply {
             setOnClickListener {
-                Timber.v("clicked")
                 onButtonClicked()
             }
 
         }
 
-
-        binding.btn.setOnClickListener {
-
-        }
 
 
         lifecycleScope.launch {
@@ -85,52 +78,19 @@ class HomeFragment : Fragment(), OnItemClickListener {
         lifecycleScope.launchWhenResumed {
             homeViewModel.notesList.collect {
                 var playedList = mutableListOf<Boolean>()
+                var elapsedTime = mutableListOf<Long>()
                 for(i in 0..it.size){
                     playedList.add(false)
+                    elapsedTime.add(0L)
                 }
-                adapter.updateData(it, playedList)
+                adapter.updateData(it, playedList, elapsedTime)
             }
         }
-//        playController.mediaPlayer?.setOnCompletionListener(MediaPlayer.OnCompletionListener {
-//            Timber.v("completed")
-//            if(previous!=null) {
-//                playController.stopPlayNote()
-//                adapter.updatePlaying(previous!!, false)
-//                previous = null
-//            }
-//        })
-
-//        playController.mediaPlayer?.setOnCompletionListener {
-//            Timber.v("completed")
-//            if(previous!=null) {
-//                playController.stopPlayNote()
-//                adapter.updatePlaying(previous!!, false)
-//                previous = null
-//            }
-//        }
 
 
-//        playController.mediaPlayer?.setOnCompletionListener(OnCompletionListener {
-//            Timber.v("t5 completed")
-//            if(previous!=null) {
-//                playController.stopPlayNote()
-//                adapter.updatePlaying(previous!!, false)
-//                previous = null
-//            }
-//        })
 
-
-        // Inflate the layout for this fragment
         return binding.root
     }
-
-//    companion object {
-//
-//        @JvmStatic
-//        fun newInstance() =
-//            HomeFragment().apply {
-//            }
-//    }
 
     override fun onStop() {
         super.onStop()
@@ -139,12 +99,13 @@ class HomeFragment : Fragment(), OnItemClickListener {
             binding.startButton.setImageResource(R.drawable.ic_mic)
         }
 
-        if(playController.stillPlaying()) playController.stopPlayNote()
+        if(playController.stillPlaying()) {
+            playController.stopPlayNote()
+            adapter.updatePlaying(previous, false)
+        }
     }
 
     private fun onButtonClicked() {
-
-        Timber.v("clicked")
         if (recordController.isAudioRecording()) {
             stopRecord()
             binding.startButton.setImageResource(R.drawable.ic_mic)
@@ -153,7 +114,7 @@ class HomeFragment : Fragment(), OnItemClickListener {
             binding.startButton.setImageResource(R.drawable.oval)
             playController.stopPlayNote()
             previous=null
-            var startTime = System.currentTimeMillis()
+            val startTime = System.currentTimeMillis()
             val fileName = "${startTime}.wav"
             recordController.start(fileName)
             lifecycleScope.launch {
@@ -191,10 +152,7 @@ class HomeFragment : Fragment(), OnItemClickListener {
         countDownTimer = null
         lifecycleScope.launch {
             async {
-                Timber.v("t5 current id is $currentId")
                 homeViewModel.updateDuration(currentId, (System.currentTimeMillis()))
-
-    //                    Timber.v("t5 ${homeViewModel.getNote(currentId).endDateTime}" )
             }
         }
     }
@@ -211,22 +169,18 @@ class HomeFragment : Fragment(), OnItemClickListener {
             .duration = VOLUME_UPDATE_DURATION
     }
 
-    private companion object {
-        private const val MAX_RECORD_AMPLITUDE = 32768.0
-        private const val VOLUME_UPDATE_DURATION = 100L
-        private val interpolator = OvershootInterpolator()
-    }
-
 
     override fun onItemClick(item: AudioNote) {
         if (recordController.isAudioRecording()) {
             stopRecord()
+            binding.startButton.setImageResource(R.drawable.ic_mic)
+
         }
 
         if(playController.stillPlaying()){
             if(previous!=null && previous!=item){
                 playController.stopPlayNote()
-                adapter.updatePlaying(previous!!, false)
+                adapter.updatePlaying(previous, false)
                 playController.playNote(item, adapter)
                 adapter.updatePlaying(item, true)
                 previous = item
@@ -240,20 +194,13 @@ class HomeFragment : Fragment(), OnItemClickListener {
             playController.playNote(item, adapter)
             previous = item
         }
+    }
 
-        //
-//        if(playController.stopPlayNote()){
-//            adapter.updatePlaying(item, false)
-//            previous = null
-//        } else {
-//            if(previous!=null){
-//                adapter.updatePlaying(previous!!, false)
-//            }
-//            adapter.updatePlaying(item, true)
-//            playController.playNote(item.notePath)
-//            previous = item
-//        }
 
+    private companion object {
+        private const val MAX_RECORD_AMPLITUDE = 32768.0
+        private const val VOLUME_UPDATE_DURATION = 100L
+        private val interpolator = OvershootInterpolator()
     }
 
 

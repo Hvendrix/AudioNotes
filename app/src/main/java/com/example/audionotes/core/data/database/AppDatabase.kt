@@ -9,7 +9,6 @@ import com.example.audionotes.core.data.model.AudioNote
     version = 1,
     exportSchema = false
 )
-//@TypeConverters(ResultConverter::class)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun notesDao(): NotesDao

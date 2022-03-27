@@ -4,7 +4,7 @@ import com.example.audionotes.core.data.model.AudioNote
 import kotlinx.coroutines.flow.Flow
 
 interface NotesRepository {
-    suspend fun getNotes(): Flow<List<AudioNote>>
+    suspend fun getNotes(): Flow<MutableList<AudioNote>>
 
     suspend fun getNote(id: Long): Flow<AudioNote>
 

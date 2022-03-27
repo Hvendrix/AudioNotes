@@ -19,10 +19,10 @@ class HomeViewModel @Inject constructor() : ViewModel() {
     @Inject
     lateinit var homeInteractor: HomeInteractor
 
-    private val _notesList = MutableStateFlow<List<AudioNote>>(
+    private val _notesList = MutableStateFlow<MutableList<AudioNote>>(
         mutableListOf()
     )
-    val notesList: StateFlow<List<AudioNote>> = _notesList.asStateFlow()
+    val notesList: StateFlow<MutableList<AudioNote>> = _notesList.asStateFlow()
 
 
     private val _playedList = MutableStateFlow<List<Boolean>>(

@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface NotesDao {
-//    onConflict = OnConflictStrategy.REPLACE
     @Insert()
     fun saveNote(audioNote: AudioNote): Long
 
@@ -15,7 +14,7 @@ interface NotesDao {
     fun getNote(id: Long): Flow<AudioNote>
 
     @Query("SELECT * FROM notes")
-    fun getNotes(): Flow<List<AudioNote>>
+    fun getNotes(): Flow<MutableList<AudioNote>>
 
     @Query("DELETE FROM notes")
     fun deleteNotes()

@@ -12,28 +12,45 @@ class AdapterNotes(
     onItemClickListener: OnItemClickListener
 ) : RecyclerView.Adapter<ViewHolderNote>() {
 
-    var data = listOf<AudioNote>()
+    var data = mutableListOf<AudioNote>()
     var dataPlayed = mutableListOf<Boolean>()
+    var elapsedTime = mutableListOf<Long>()
 
     private var onItemClickListener: OnItemClickListener = onItemClickListener
 
 
-    fun updateData(list: List<AudioNote>, listPlayed: MutableList<Boolean>) {
+    fun updateData(list: MutableList<AudioNote>, listPlayed: MutableList<Boolean>, listTime: MutableList<Long>) {
         if(!list.isNullOrEmpty()) {
             data = list
             dataPlayed = listPlayed
+            elapsedTime = listTime
             notifyDataSetChanged()
 
         }
     }
 
-    fun updatePlaying(audioNote: AudioNote, playing: Boolean){
-        var index = data.indexOf(audioNote)
-        dataPlayed[index] = playing
-        notifyItemChanged(index)
+    fun updatePlaying(audioNote: AudioNote?, playing: Boolean){
+        if(audioNote!=null) {
+            var index = data.indexOf(audioNote)
+            dataPlayed[index] = playing
+            elapsedTime[index] = 0L
+
+            notifyItemChanged(index)
+        }
+    }
+
+
+    fun updatePlaying(audioNote: AudioNote?, playing: Boolean, milliseconds: Long){
+        if(audioNote!=null) {
+            var index = data.indexOf(audioNote)
+            dataPlayed[index] = playing
+            elapsedTime[index] = milliseconds
+            notifyItemChanged(index)
+        }
     }
     fun addToData(audioNote : AudioNote){
-
+            data.add(audioNote)
+            notifyItemInserted(data.size-1)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderNote {
@@ -46,7 +63,7 @@ class AdapterNotes(
     }
 
     override fun onBindViewHolder(holder: ViewHolderNote, position: Int) {
-        holder.bind(data[position],dataPlayed[position], onItemClickListener)
+        holder.bind(data[position],dataPlayed[position], elapsedTime[position], onItemClickListener)
     }
 
     override fun getItemCount(): Int {
