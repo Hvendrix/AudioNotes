@@ -12,7 +12,13 @@ class ViewHolderNote(
     fun bind(audioNote: AudioNote, onItemClickListener: OnItemClickListener){
         binding.textViewNameNote.text = audioNote.name
 //        binding.textViewDateNote.text = audioNote.date.toString()
-        binding.textViewDateNote.text = DateTimeUtils.getTimeStamp(audioNote.date)
+        binding.textViewDateNote.text = DateTimeUtils.getTimeStamp(audioNote.startDateTime)
+        if(audioNote.endDateTime!=0) {
+            val duration = audioNote.endDateTime - audioNote.startDateTime
+            binding.textViewTimeInterval.text = DateTimeUtils.getDuration(duration)
+        } else {
+            binding.textViewTimeInterval.text = "0"
+        }
         binding.buttonPlayNote.setOnClickListener {
 
             onItemClickListener.onItemClick(audioNote)

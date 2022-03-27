@@ -20,63 +20,49 @@ class HomeViewModel @Inject constructor() : ViewModel() {
     lateinit var homeInteractor: HomeInteractor
 
     private val _notesList = MutableStateFlow<List<AudioNote>>(
-        mutableListOf(AudioNote( "2", 3, 4, ""))
+        mutableListOf()
     )
     val notesList: StateFlow<List<AudioNote>> = _notesList.asStateFlow()
 
     init {
-//        viewModelScope.launch {
-//            getAudioNotes()
-//        }
 
-//        _notesList.value = mutableListOf(
-//            AudioNote(1, "1", 3, 4, ""),
-//            AudioNote(2, "2", 3, 4, ""),
-//            AudioNote(3, "3", 3, 4, "")
-//        )
     }
 
 
-    fun saveAudioNote(audioNote: AudioNote) {
+    suspend fun saveAudioNote(audioNote: AudioNote) : Long{
+        var id = 0L
         viewModelScope.launch {
-            val x = homeInteractor.saveNote(audioNote)
-            Timber.v("t5 x is " + x)
+             id = homeInteractor.saveNote(audioNote)
+//            Timber.v("t5 x is " + x)
             getAudioNotes()
-//            bookmarkBookUseCase.invoke(mapper.fromBookWithStatusToVolume(book))
         }
+        return id
     }
 
     suspend fun getAudioNotes() {
         viewModelScope.launch {
             homeInteractor.getNotes().flowOn(Dispatchers.IO).collect {
-                _notesList.value = it
-                Timber.v("t5 list" + it.size + " " + it.get(0).date)
+                if(!it.isNullOrEmpty()) {
+                    _notesList.value = it
+                    Timber.v("t5 list" + it.size + " " + it.get(0).startDateTime)
+                }
             }
-//            bookmarkBookUseCase.invoke(mapper.fromBookWithStatusToVolume(book))
         }
     }
 
 
-//    fun playNote(path: String) {
-//        var myExternalFile: File?=null
-//        val filename = "name123"
-//        if (filename.toString() != null && filename.toString().trim() != "") {
-//
-//            val mediaPlayer = MediaPlayer().apply {
-//                setAudioAttributes(
-//                    AudioAttributes.Builder()
-//                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-//                        .setUsage(AudioAttributes.USAGE_MEDIA)
-//                        .build()
-//                )
-//                myExternalFile = File(getAppl.getExternalFilesDir(filepath), filename)
-//                setDataSource(myExternalFile!!.absolutePath)
-//                prepare()
-//                start()
-//            }
-//            mediaPlayer.start()
-//        }
+    fun updateDuration(id: Long, endDateTime: Long){
+        viewModelScope.launch {
+            homeInteractor.updateDuration(id, endDateTime)
+            getAudioNotes()
+        }
+    }
+
+
+//    suspend fun getNote(id: Long): AudioNote{
+//           return homeInteractor.getNote(id).
 //    }
+
 
 
 }

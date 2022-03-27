@@ -19,4 +19,7 @@ interface NotesDao {
 
     @Query("DELETE FROM notes")
     fun deleteNotes()
+
+    @Query("UPDATE notes SET endDateTime = :endDateTime WHERE id = :id")
+    fun updateDuration(id: Long, endDateTime: Long)
 }

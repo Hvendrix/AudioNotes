@@ -18,8 +18,13 @@ class AdapterNotes(
 
 
     fun updateData(list: List<AudioNote>) {
-        data = list
-        notifyDataSetChanged()
+        if(!list.isNullOrEmpty()) {
+            data = list
+            notifyDataSetChanged()
+        }
+    }
+    fun addToData(audioNote : AudioNote){
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderNote {

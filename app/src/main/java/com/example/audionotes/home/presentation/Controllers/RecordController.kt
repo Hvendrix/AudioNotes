@@ -1,4 +1,4 @@
-package com.example.audionotes.home.presentation.ui.Controller
+package com.example.audionotes.home.presentation.Controllers
 
 import android.media.MediaRecorder
 import com.example.audionotes.core.utils.IOUtils

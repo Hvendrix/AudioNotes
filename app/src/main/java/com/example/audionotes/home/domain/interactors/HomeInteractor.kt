@@ -19,9 +19,19 @@ class HomeInteractor(
         return@withContext notesRepository.getNotes()
     }
 
-    suspend fun saveNote(audioNote: AudioNote) = withContext(Dispatchers.IO){
-        return@withContext notesRepository.saveNote(audioNote)
+    suspend fun getNote(id: Long): Flow<AudioNote> = withContext(Dispatchers.IO){
+        return@withContext notesRepository.getNote(id)
     }
 
+    suspend fun saveNote(audioNote: AudioNote): Long{
+        return withContext(Dispatchers.IO) {
+            return@withContext notesRepository.saveNote(audioNote)
+        }
+    }
+
+
+    suspend fun updateDuration(id: Long, endDateTime: Long) = withContext(Dispatchers.IO){
+        notesRepository.updateDuration(id, endDateTime)
+    }
 
 }

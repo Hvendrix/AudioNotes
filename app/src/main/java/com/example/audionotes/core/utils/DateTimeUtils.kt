@@ -12,4 +12,12 @@ object DateTimeUtils {
         println("Today is $date")
         return date
     }
+
+    fun getDuration(timeinMillies: Long): String?{
+        var date: String? = null
+        val formatter = SimpleDateFormat("dd.MM.yyyy в HH:mm:ss") // modify format
+        date = formatter.format(Date(timeinMillies))
+        println("Today is $date")
+        return date
+    }
 }

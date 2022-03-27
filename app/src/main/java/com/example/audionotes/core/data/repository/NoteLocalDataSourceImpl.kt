@@ -11,6 +11,10 @@ class NoteLocalDataSourceImpl(
         return notesDao.getNotes()
     }
 
+    override suspend fun getNote(id: Long): Flow<AudioNote> {
+        return notesDao.getNote(id)
+    }
+
     override suspend fun saveNote(audioNote: AudioNote): Long {
         return notesDao.saveNote(audioNote)
 
@@ -18,5 +22,9 @@ class NoteLocalDataSourceImpl(
 
     override suspend fun deleteNotes() {
         return notesDao.deleteNotes()
+    }
+
+    override suspend fun updateDuration(id: Long, endDateTime: Long) {
+        return notesDao.updateDuration(id, endDateTime)
     }
 }

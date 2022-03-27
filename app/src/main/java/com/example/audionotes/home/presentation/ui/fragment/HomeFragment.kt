@@ -1,10 +1,7 @@
 package com.example.audionotes.home.presentation.ui.fragment
 
-import android.media.AudioAttributes
-import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.os.Environment
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -14,9 +11,10 @@ import androidx.core.app.ActivityCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.audionotes.core.data.model.AudioNote
+import com.example.audionotes.core.utils.DateTimeUtils
 import com.example.audionotes.databinding.FragmentHomeBinding
-import com.example.audionotes.home.presentation.ui.Controller.PlayController
-import com.example.audionotes.home.presentation.ui.Controller.RecordController
+import com.example.audionotes.home.presentation.Controllers.PlayController
+import com.example.audionotes.home.presentation.Controllers.RecordController
 import com.example.audionotes.home.presentation.ui.list.adapter.AdapterNotes
 import com.example.audionotes.home.presentation.ui.list.viewholder.OnItemClickListener
 import com.example.audionotes.home.presentation.ui.viewmodel.HomeViewModel
@@ -26,7 +24,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import kotlin.math.min
-import java.io.*
 
 
 @AndroidEntryPoint
@@ -37,21 +34,11 @@ class HomeFragment : Fragment(), OnItemClickListener {
     lateinit var recordController: RecordController
     lateinit var playController: PlayController
     private var countDownTimer: CountDownTimer? = null
+    private var startTime: Long = 0
+    private var currentId: Long = 0
 
     private val homeViewModel: HomeViewModel by viewModels()
 
-
-
-    private val filepath = "MyFileStorage"
-    private var myExternalFile: File?=null
-    private val isExternalStorageReadOnly: Boolean get() {
-        val extStorageState = Environment.getExternalStorageState()
-        return Environment.MEDIA_MOUNTED_READ_ONLY == extStorageState
-    }
-    private val isExternalStorageAvailable: Boolean get() {
-        val extStorageState = Environment.getExternalStorageState()
-        return Environment.MEDIA_MOUNTED.equals(extStorageState)
-    }
 
 
     override fun onCreateView(
@@ -70,65 +57,27 @@ class HomeFragment : Fragment(), OnItemClickListener {
                 777,
             )
         }
-//        adapter.updateData(listOf(NoteEntity(1,"2", 3, 4)))
 
         binding.recyclerViewNotes.adapter = adapter
 
-        var fileData = "date"
 
         binding.startButton.apply {
             setOnClickListener {
                 Timber.v("clicked")
                 onButtonClicked()
-//                myExternalFile = File(this@HomeFragment.requireContext().getExternalFilesDir(filepath), "name123")
-//                try {
-//                    val fileOutPutStream = FileOutputStream(myExternalFile)
-//                    fileOutPutStream.write(fileData.toString().toByteArray())
-//                    fileOutPutStream.close()
-//                } catch (e: IOException) {
-//                    e.printStackTrace()
-//                }
-//                Toast.makeText(this@HomeFragment.requireContext(),"data save",Toast.LENGTH_SHORT).show()
-//                Timber.v("test")
-
-//                lifecycleScope.launch {
-//                    val notes = async { homeViewModel.getAudioNotes() }
-////                    Timber.v("t5 " + notes.await().size)
-////                    homeViewModel.consumeData(notes.await())
-//                }
-
-
-
-        }
+            }
 
         }
 
 
         binding.btn.setOnClickListener {
 
-
-            lifecycleScope.launch{
-
-                val notes = async { homeViewModel.getAudioNotes() }
-//                 val post = async { homeViewModel.saveAudioNote(AudioNote("5", 44, 4, "4")) }
-            }
-//            val filename = "name123"
-//            val mediaPlayer = MediaPlayer().apply {
-//                setAudioAttributes(
-//                    AudioAttributes.Builder()
-//                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-//                        .setUsage(AudioAttributes.USAGE_MEDIA)
-//                        .build()
-//                )
-//                myExternalFile = File(this@HomeFragment.requireContext().getExternalFilesDir(filepath),filename)
-//                setDataSource(myExternalFile!!.absolutePath)
-//                prepare()
-//                start()
-//            }
-//            mediaPlayer.start()
         }
 
 
+        lifecycleScope.launch {
+            async { homeViewModel.getAudioNotes() }
+        }
 
         lifecycleScope.launchWhenResumed {
             homeViewModel.notesList.collect {
@@ -156,14 +105,34 @@ class HomeFragment : Fragment(), OnItemClickListener {
             recordController.stop()
             countDownTimer?.cancel()
             countDownTimer = null
-        } else {
+            lifecycleScope.launch{
+                async {
+                    Timber.v("t5 current id is $currentId")
+                    homeViewModel.updateDuration(currentId, (System.currentTimeMillis() - startTime))
+                    Timber.v("t5 ${DateTimeUtils.getDuration(System.currentTimeMillis() - startTime)}")
 
-            val startTime = System.currentTimeMillis()
+//                    Timber.v("t5 ${homeViewModel.getNote(currentId).endDateTime}" )
+                }
+            }
+            Timber.v("t5 ${DateTimeUtils.getDuration(System.currentTimeMillis() - startTime)}")
+        } else {
+            startTime = System.currentTimeMillis()
             val fileName = "${startTime}.wav"
 //            val fileName = "${File.pathSeparator}${startTime}.wav"
             recordController.start(fileName)
             lifecycleScope.launch {
-                async { homeViewModel.saveAudioNote(AudioNote("Новая заметка", startTime, 0, fileName)) }
+                var id = async {
+                    homeViewModel.saveAudioNote(
+                        AudioNote(
+                            "Новая заметка",
+                            startTime,
+                            0,
+                            fileName
+                        )
+                    )
+                }
+                currentId = id.await()
+
             }
             countDownTimer = object : CountDownTimer(60_000, VOLUME_UPDATE_DURATION) {
                 override fun onTick(p0: Long) {

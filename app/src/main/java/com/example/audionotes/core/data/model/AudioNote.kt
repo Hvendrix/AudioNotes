@@ -8,8 +8,8 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "notes")
 data class AudioNote(
     val name: String,
-    val date: Long,
-    val duration: Int,
+    val startDateTime: Long,
+    val endDateTime: Int,
     @ColumnInfo(name = "note_path")
     val notePath: String,
     @PrimaryKey(autoGenerate = true)

@@ -11,8 +11,8 @@ private val localDataSource: NoteLocalDataSource
         return localDataSource.getNotes()
     }
 
-    override suspend fun getNote(): Flow<AudioNote> {
-        TODO("Not yet implemented")
+    override suspend fun getNote(id: Long): Flow<AudioNote> {
+        return localDataSource.getNote(id)
     }
 
     override suspend fun saveNote(audioNote: AudioNote): Long {
@@ -21,5 +21,9 @@ private val localDataSource: NoteLocalDataSource
 
     override suspend fun deleteNotes() {
         return localDataSource.deleteNotes()
+    }
+
+    override suspend fun updateDuration(id: Long, endDateTime: Long) {
+        return localDataSource.updateDuration(id, endDateTime)
     }
 }
