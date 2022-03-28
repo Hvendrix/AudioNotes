@@ -3,6 +3,8 @@ package com.example.audionotes
 import android.app.Application
 import android.os.StrictMode
 import com.example.audionotes.core.utils.IOUtils
+import com.vk.api.sdk.VK
+import com.vk.api.sdk.VKTokenExpiredHandler
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
 
@@ -29,6 +31,15 @@ class MainApplication : Application() {
                     .build()
             )
             Timber.plant(Timber.DebugTree())
+        }
+
+        VK.addTokenExpiredHandler(tokenTracker)
+    }
+
+
+    private val tokenTracker = object: VKTokenExpiredHandler {
+        override fun onTokenExpired() {
+            Timber.v("token expired")
         }
     }
 }

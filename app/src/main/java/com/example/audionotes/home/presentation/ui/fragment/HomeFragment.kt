@@ -1,6 +1,7 @@
 package com.example.audionotes.home.presentation.ui.fragment
 
 import android.content.DialogInterface
+import android.net.Uri
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.LayoutInflater
@@ -8,23 +9,30 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.OvershootInterpolator
 import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.audionotes.R
+import com.example.audionotes.VKAudioNoteWallPostCommand
 import com.example.audionotes.core.data.model.AudioNote
+import com.example.audionotes.core.utils.IOUtils
 import com.example.audionotes.databinding.FragmentHomeBinding
 import com.example.audionotes.home.presentation.Controllers.PlayController
 import com.example.audionotes.home.presentation.Controllers.RecordController
 import com.example.audionotes.home.presentation.ui.list.adapter.AdapterNotes
 import com.example.audionotes.home.presentation.ui.list.viewholder.OnItemClickListener
 import com.example.audionotes.home.presentation.ui.viewmodel.HomeViewModel
+import com.vk.api.sdk.VK
+import com.vk.api.sdk.VKApiCallback
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.io.File
+import java.lang.Exception
 import kotlin.math.min
 
 
@@ -121,7 +129,7 @@ class HomeFragment : Fragment(), OnItemClickListener {
             playController.stopPlayNote()
             previous=null
             val startTime = System.currentTimeMillis()
-            val fileName = "${startTime}.wav"
+            val fileName = "${startTime}.mp3"
             recordController.start(fileName)
             lifecycleScope.launch {
                 var id = async {
@@ -223,6 +231,9 @@ class HomeFragment : Fragment(), OnItemClickListener {
                 homeViewModel.updateName(item.id, taskText)
             })
             .setNegativeButton("Отмена", null)
+            .setNeutralButton("VK", DialogInterface.OnClickListener { dialog, which ->
+                postMessage(item)
+            })
             .create()
         dialog.show()
     }
@@ -232,6 +243,22 @@ class HomeFragment : Fragment(), OnItemClickListener {
         private const val MAX_RECORD_AMPLITUDE = 32768.0
         private const val VOLUME_UPDATE_DURATION = 100L
         private val interpolator = OvershootInterpolator()
+    }
+
+    private fun postMessage(item: AudioNote){
+        var myExternalFile = File(IOUtils.cacheFolder, item.notePath)
+        try {
+            VK.execute(VKAudioNoteWallPostCommand(message = "${item.name}", audioNotesUriList = listOf(Uri.fromFile(myExternalFile))), object: VKApiCallback<Int> {
+            override fun success(result: Int) {
+                Toast.makeText(this@HomeFragment.requireContext(), "Файл был опубликован на стене", Toast.LENGTH_SHORT).show()
+            }
+            override fun fail(error: Exception) {
+                Timber.v(error.toString())
+            }
+        })
+        } catch (e: Exception){
+            Timber.v(e)
+        }
     }
 
 
