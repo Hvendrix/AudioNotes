@@ -32,13 +32,8 @@ class RecordController() {
     }
 
     private fun getAudioPath(fileName: String): String {
-//        val filepath = "MyFileStorage"
-//        return "${context.cacheDir.absolutePath}${File.pathSeparator}${System.currentTimeMillis()}.wav"
-//        val filename ="${File.pathSeparator}${fileName}"
-//        val myExternalFile = File(context.getExternalFilesDir(filepath),filename)
         val myExternalFile = File(IOUtils.cacheFolder, fileName)
         return "$myExternalFile"
-//        return "${context.cacheDir.absolutePath}${File.pathSeparator}.wav"
     }
 
     fun stop() {

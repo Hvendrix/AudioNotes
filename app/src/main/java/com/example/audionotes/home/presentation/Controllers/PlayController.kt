@@ -34,11 +34,9 @@ class PlayController() {
 //        }
 
         val durationTime = Math.abs(DateTimeUtils.getDurationMilliseconds(Date(item.endDateTime), Date(item.startDateTime)))
-        Timber.v("t5 duration" + durationTime)
         timer = object: CountDownTimer(durationTime, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 adapterNotes.updatePlaying(item, true, durationTime-millisUntilFinished)
-                Timber.v("timer "+ (durationTime-millisUntilFinished))
             }
 
             override fun onFinish() {
