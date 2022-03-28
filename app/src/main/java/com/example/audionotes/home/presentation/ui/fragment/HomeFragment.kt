@@ -1,6 +1,8 @@
 package com.example.audionotes.home.presentation.ui.fragment
 
+import android.Manifest
 import android.content.DialogInterface
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -11,6 +13,7 @@ import android.view.animation.OvershootInterpolator
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -32,7 +35,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.File
-import java.lang.Exception
 import kotlin.math.min
 
 
@@ -120,6 +122,12 @@ class HomeFragment : Fragment(), OnItemClickListener {
     }
 
     private fun onButtonClicked() {
+        val permissionStatus =
+            ContextCompat.checkSelfPermission(this.requireContext(), Manifest.permission.RECORD_AUDIO)
+        if (permissionStatus != PackageManager.PERMISSION_GRANTED){
+            Toast.makeText(this.requireContext(), "Требуется разрешение на запись", Toast.LENGTH_SHORT).show()
+            return
+        }
         if (recordController.isAudioRecording()) {
             stopRecord()
             binding.startButton.setImageResource(R.drawable.ic_mic)
@@ -253,6 +261,7 @@ class HomeFragment : Fragment(), OnItemClickListener {
                 Toast.makeText(this@HomeFragment.requireContext(), "Файл был опубликован на стене", Toast.LENGTH_SHORT).show()
             }
             override fun fail(error: Exception) {
+                Toast.makeText(this@HomeFragment.requireContext(), "Не удалось опубликовать", Toast.LENGTH_SHORT).show()
                 Timber.v(error.toString())
             }
         })
